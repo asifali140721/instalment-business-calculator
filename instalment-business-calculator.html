@@ -1,0 +1,513 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<meta name="color-scheme" content="light dark"/>
+<link rel="icon" href="data:,"/>
+<title>Instalment Business Calculator — 1 Crore, 12 Qist</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f4f6f3; --surface:#ffffff; --surface2:#eef2ee; --ink:#132018; --muted:#5b6b60; --line:#dbe3dc;
+  --green:#0b4a34; --green2:#0e6b4a; --gold:#b98a1f; --gold-bg:#fdf3d7; --red:#b42318; --red-bg:#fef0ef;
+  --radius:14px; --shadow:0 6px 24px rgba(11,74,52,.08);
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#0d1511; --surface:#16211a; --surface2:#1c2a20; --ink:#e8f0e9; --muted:#9db0a2; --line:#2a3a2e; --green:#2f9d74; --green2:#3bb489; --gold:#e3b94e; --gold-bg:#2b2410; --red:#ff8a7a; --red-bg:#2e1713; --shadow:none; }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans",system-ui,sans-serif;line-height:1.5}
+button,input,select{min-height:40px}
+.mono{font-family:"IBM Plex Mono",monospace}
+.wrap{max-width:1180px;margin:0 auto;padding:18px 16px 40px}
+.hero{background:var(--green);color:#fff;border-radius:18px;padding:22px 20px 18px;position:relative;overflow:hidden}
+@media (prefers-color-scheme: dark){.hero{background:#123324}}
+.hero h1{font-size:clamp(24px,4vw,38px);line-height:1.05;margin:0 0 8px;font-weight:800;letter-spacing:-.02em;max-width:680px}
+.hero p{margin:0;color:#d8eadf;max-width:700px;font-size:15px}
+.hero-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:18px}
+.hstat{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);border-radius:12px;padding:12px}
+.hstat small{display:block;color:#cfe6d7;font-size:11px;letter-spacing:.06em;text-transform:uppercase;font-weight:700}
+.hstat strong{font-size:18px;line-height:1.1}
+.presets{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 0}
+.preset{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:8px 13px;font-weight:600;cursor:pointer;font-size:13px}
+.preset.active{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.layout{display:grid;grid-template-columns:360px 1fr;gap:16px;margin-top:16px;align-items:start}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow)}
+.panel h2{font-size:17px;margin:0 0 4px}
+.panel h3{font-size:14px;margin:20px 0 8px;border-top:1px solid var(--line);padding-top:16px}
+.sub{color:var(--muted);font-size:13px;margin:0 0 14px}
+.field{margin-bottom:14px}
+.field label{display:flex;justify-content:space-between;gap:10px;font-size:13px;font-weight:600;margin-bottom:6px}
+.field label span:last-child{color:var(--green2)}
+.field input[type=number]{width:100%;border:1px solid var(--line);background:var(--surface2);color:var(--ink);border-radius:10px;padding:10px 12px;font-size:15px;font-weight:600}
+.field input[type=range]{width:100%;accent-color:var(--green2);min-height:28px;padding:0}
+.hint{font-size:12px;color:var(--muted);margin-top:3px}
+.toggle{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--surface2);border-radius:10px;padding:10px 12px;font-weight:700;font-size:14px}
+.toggle input{width:22px;height:22px;accent-color:var(--green2)}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:14px}
+.kpi small{font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);font-weight:700;display:block}
+.kpi strong{font-size:20px;line-height:1.15;display:block;margin-top:4px}
+.kpi p{margin:4px 0 0;font-size:12px;color:var(--muted)}
+.kpi.highlight{background:var(--gold-bg);border-color:#e8d48a}
+.stack{display:flex;flex-direction:column;gap:16px}
+.breakbar{display:flex;height:18px;border-radius:999px;overflow:hidden;border:1px solid var(--line)}
+.breakbar div{height:100%}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:12px;color:var(--muted);margin-top:8px}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:5px;vertical-align:middle}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{text-align:left;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);padding:10px 8px;border-bottom:2px solid var(--line)}
+td{padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+td.num,th.num{text-align:right;font-family:"IBM Plex Mono",monospace;white-space:nowrap}
+tr.total td{font-weight:800;background:var(--surface2)}
+.scrollx{overflow-x:auto}
+.chart-wrap{background:var(--surface2);border-radius:12px;padding:14px 10px 6px}
+.note{border-left:4px solid var(--gold);background:var(--gold-bg);padding:12px 14px;border-radius:0 12px 12px 0;font-size:13.5px}
+.note.red{border-color:var(--red);background:var(--red-bg)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.checklist{list-style:none;padding:0;margin:0;display:grid;gap:10px}
+.checklist li{display:flex;gap:10px;font-size:14px}
+.checklist li::before{content:"✓";width:24px;height:24px;flex:0 0 24px;border-radius:50%;background:var(--green);color:#fff;display:grid;place-items:center;font-size:13px;font-weight:800;margin-top:1px}
+.btn{width:100%;border:0;border-radius:12px;background:var(--green);color:#fff;font-weight:800;padding:13px;cursor:pointer;font-size:15px}
+.btn:active{transform:scale(.99)}
+#copyMsg{font-size:13px;color:var(--green2);text-align:center;min-height:20px;margin-top:6px;font-weight:600}
+.footer{font-size:12px;color:var(--muted);margin-top:14px;text-align:center}
+.slider-row{display:flex;gap:8px;align-items:center}
+.slider-row input[type=range]{flex:1;min-width:0}
+.mini-num{width:86px;flex:0 0 86px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:10px;padding:8px 9px;font-size:14px;font-weight:700;text-align:right;font-family:"IBM Plex Mono",monospace}
+.mini-num:focus{outline:2px solid var(--green2);outline-offset:1px}
+.btn-sm{border:0;border-radius:10px;background:var(--green);color:#fff;font-weight:800;padding:11px 14px;cursor:pointer;font-size:14px;width:100%}
+.btn-sm:active{transform:scale(.99)}
+.btn-ghost{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:10px;padding:9px 12px;font-weight:700;cursor:pointer;font-size:13px}
+.amt-box{background:var(--surface2);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:16px}
+.amt-box h4{margin:0 0 3px;font-size:14px}
+.amt-box .sub{margin-bottom:10px}
+.amt-box .field{margin-bottom:10px}
+.amt-box .field input[type=number]{background:var(--surface)}
+.amt-total{display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:12px 0 10px;font-weight:700;font-size:14px}
+.amt-total strong{font-size:16px;color:var(--green2)}
+.add-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;align-items:center}
+.add-row span{font-size:12px;color:var(--muted);font-weight:700;width:100%}
+.add-chip{border:1px solid var(--green2);background:var(--surface);color:var(--green2);border-radius:999px;padding:6px 11px;font-weight:800;cursor:pointer;font-size:12.5px;min-height:34px}
+.add-chip.neg{border-color:var(--line);color:var(--muted)}
+.add-chip:active{transform:scale(.98)}
+.amt-msg{font-size:13px;font-weight:600;min-height:19px;margin-top:7px;color:var(--green2)}
+.manual-badge{display:inline-block;background:var(--gold-bg);color:var(--gold);border:1px solid #e8d48a;border-radius:999px;padding:2px 9px;font-size:11px;font-weight:800;letter-spacing:.03em;vertical-align:middle;margin-left:6px}
+@media(max-width:900px){.layout{grid-template-columns:1fr}.hero-stats{grid-template-columns:1fr 1fr}.kpis{grid-template-columns:1fr 1fr}.two{grid-template-columns:1fr}}
+@media(max-width:520px){.kpis{grid-template-columns:1fr 1fr}.hstat strong{font-size:16px} td,th{padding:8px 6px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <section class="hero">
+    <h1>1 Crore se 12 Qiston wala Business — Poora Hisaab, Ek Jagah</h1>
+    <p>Mobile waghera khareedo, down payment lo, baqi rakam 12 barabar qiston mein wasool karo. Neeche apne numbers badlo — products ki tadaad, per-customer qist, monthly collection, bank ki qist aur kul munafa foran update ho jayega.</p>
+    <div class="hero-stats">
+      <div class="hstat"><small>Starting Capital</small><strong class="mono" id="hCapital">Rs 1.00 Cr</strong></div>
+      <div class="hstat"><small>Products Bikenge</small><strong class="mono" id="hProducts">—</strong></div>
+      <div class="hstat"><small>Har Mahine Collection</small><strong class="mono" id="hMonthly">—</strong></div>
+      <div class="hstat"><small>Asal Munafa · Pehla Cycle</small><strong class="mono" id="hProfit">—</strong></div>
+    </div>
+  </section>
+
+  <div class="presets" aria-label="Quick presets">
+    <button class="preset" data-preset="50">Rs 50 Lakh se Start</button>
+    <button class="preset" data-preset="75">Rs 75 Lakh — Tier 3 Limit</button>
+    <button class="preset active" data-preset="100">Rs 1 Crore</button>
+    <button class="preset" data-preset="phone30">Sasta Phone · Rs 30,000</button>
+    <button class="preset" data-preset="phone85">Mehenga Phone · Rs 85,000</button>
+  </div>
+
+  <div class="layout">
+    <!-- CONTROLS -->
+    <aside class="panel" style="position:sticky;top:12px;max-height:calc(100vh - 24px);overflow-y:auto">
+      <h2>⚙️ Apna Hisaab Lagao</h2>
+      <p class="sub">Har raqam haath se likh sakte ho — capital, loan, qeemat, kharcha sab mein manual add hai, preset sirf shortcut hai. Ye tumhare apne andaze hain, asal qeemat supplier aur market se confirm karna.</p>
+
+      <div class="field"><label><span>Total Capital / Sarmaya (Rs) — haath se likho</span><span id="capShort">1.00 Cr</span></label>
+        <input type="number" id="capital" value="10000000" step="1000" min="0" inputmode="numeric" placeholder="Apni marzi ki raqam likho, maslan 8500000">
+        <input type="range" id="capitalR" min="100000" max="50000000" step="50000" value="10000000">
+        <div class="hint"><b>Preset par majboor nahi ho</b> — box mein koi bhi raqam khud type kar sakte ho (maslan Rs 63,50,000), ya neeche button se raqam jodte jao.</div>
+        <div class="add-row" aria-label="Capital mein raqam jodo">
+          <span>Capital mein ye raqam ADD karo:</span>
+          <button type="button" class="add-chip" data-addcap="100000">+ Rs 1 Lakh</button>
+          <button type="button" class="add-chip" data-addcap="500000">+ Rs 5 Lakh</button>
+          <button type="button" class="add-chip" data-addcap="1000000">+ Rs 10 Lakh</button>
+          <button type="button" class="add-chip" data-addcap="2500000">+ Rs 25 Lakh</button>
+          <button type="button" class="add-chip neg" data-addcap="-500000">− Rs 5 Lakh</button>
+          <button type="button" class="add-chip neg" data-addcap="reset">Wapas Rs 1 Crore</button>
+        </div>
+      </div>
+
+      <div class="amt-box" aria-label="Raqam jod kar capital banao">
+        <h4>➕ Raqam Jod Kar Capital Banao <span class="manual-badge">MANUAL ADD</span></h4>
+        <p class="sub">Alag alag hisse khud likho — teeno jama ho kar total capital ban jayega. Har box mein apni asal raqam type karo.</p>
+        <div class="field"><label><span>1 · Bank Loan ki raqam (Rs)</span></label>
+          <input type="number" id="compLoan" value="7500000" step="1000" min="0" inputmode="numeric" placeholder="Maslan 7500000">
+        </div>
+        <div class="field"><label><span>2 · Apne paise / apna hissa (Rs)</span></label>
+          <input type="number" id="compOwn" value="2500000" step="1000" min="0" inputmode="numeric" placeholder="Maslan 2500000">
+        </div>
+        <div class="field" style="margin-bottom:0"><label><span>3 · Koi aur raqam — partner / extra (Rs)</span></label>
+          <input type="number" id="compOther" value="0" step="1000" min="0" inputmode="numeric" placeholder="Na ho to 0 rakho">
+        </div>
+        <div class="amt-total"><span>Kul Jama (1 + 2 + 3)</span><strong class="mono" id="compTotal">Rs 1.00 Cr</strong></div>
+        <button type="button" class="btn-sm" id="applyCompBtn">✓ Ye Total — Capital aur Loan mein Lagao</button>
+        <div class="amt-msg" id="compMsg"></div>
+        <div class="hint">Lagane se: Total Capital = kul jama, aur Bank Loan wali raqam bhi pehle hisse ke barabar set ho jayegi — taake bank qist ka hisaab bhi usi raqam par chale.</div>
+      </div>
+
+      <div class="field"><label><span>Stock par lagne wala hissa</span><span id="stockPctVal">90%</span></label>
+        <div class="slider-row"><input type="range" id="stockPct" min="0" max="100" step="1" value="90" aria-label="Stock par lagne wala hissa slider"><input type="number" class="mini-num" id="stockPctN" value="90" min="0" max="100" step="1" aria-label="Stock hissa percent haath se likho"></div>
+        <div class="hint">Slider ghumao ya box mein % haath se likho. Baaki paisa reserve / kharchon ke liye rakha jata hai — 100% stock par lagana risky hai.</div>
+      </div>
+
+      <div class="field"><label><span>Ek Product ki Kharid Qeemat (Rs) — haath se likho</span><span>Cost Price</span></label>
+        <input type="number" id="cost" value="50000" step="500" min="0" inputmode="numeric" placeholder="Koi bhi qeemat likho, maslan 37500">
+        <div class="hint">Average mobile ki wholesale qeemat — koi bhi raqam khud type kar sakte ho, misaal: Rs 50,000.</div>
+      </div>
+
+      <div class="field"><label><span>Tumhara Markup</span><span id="markupVal">25%</span></label>
+        <div class="slider-row"><input type="range" id="markup" min="0" max="100" step="1" value="25" aria-label="Markup slider"><input type="number" class="mini-num" id="markupN" value="25" min="0" max="100" step="1" aria-label="Markup percent haath se likho"></div>
+        <div class="hint">Cost ke upar kitna extra le kar becho ge. 20–30% aam range hai — box mein exact % bhi likh sakte ho.</div>
+      </div>
+
+      <div class="field"><label><span>Down Payment</span><span id="downVal">25%</span></label>
+        <div class="slider-row"><input type="range" id="downPct" min="0" max="80" step="1" value="25" aria-label="Down payment slider"><input type="number" class="mini-num" id="downPctN" value="25" min="0" max="80" step="1" aria-label="Down payment percent haath se likho"></div>
+        <div class="hint">Customer pehle din kitna dega. Zyada down payment = kam risk.</div>
+      </div>
+
+      <div class="field"><label><span>Qiston ki Tadaad</span><span id="monthsVal">12 mahine</span></label>
+        <div class="slider-row"><input type="range" id="months" min="1" max="36" step="1" value="12" aria-label="Qiston ki tadaad slider"><input type="number" class="mini-num" id="monthsN" value="12" min="1" max="36" step="1" aria-label="Qiston ki tadaad haath se likho"></div>
+        <div class="hint">Tumhara plan 12 qist ka hai — yahi rakha hai, box mein apni tadaad bhi likh sakte ho.</div>
+      </div>
+
+      <div class="field"><label><span>Default ka Andaza</span><span id="defVal">5%</span></label>
+        <div class="slider-row"><input type="range" id="defaultPct" min="0" max="50" step="1" value="5" aria-label="Default andaza slider"><input type="number" class="mini-num" id="defaultPctN" value="5" min="0" max="50" step="1" aria-label="Default percent haath se likho"></div>
+        <div class="hint">Kitne % customers qist rok sakte hain — is se asal munafa kam hota hai.</div>
+      </div>
+
+      <div class="field"><label><span>Monthly Kharcha — Dukaan / Staff (Rs) — haath se likho</span><span></span></label>
+        <input type="number" id="expense" value="50000" step="500" min="0" inputmode="numeric" placeholder="Koi bhi raqam likho, maslan 47500">
+        <div class="hint">Koi bhi raqam khud type kar sakte ho — ya neeche hisse jod kar total banao.</div>
+      </div>
+
+      <div class="amt-box" aria-label="Kharcha jod kar banao">
+        <h4>➕ Kharcha Jod Kar Banao <span class="manual-badge">MANUAL ADD</span></h4>
+        <p class="sub">Har kharcha alag likho — jama ho kar monthly kharcha ban jayega.</p>
+        <div class="field"><label><span>Dukaan ka kiraya (Rs / mahina)</span></label>
+          <input type="number" id="expRent" value="20000" step="500" min="0" inputmode="numeric">
+        </div>
+        <div class="field"><label><span>Staff ki tankhwah (Rs / mahina)</span></label>
+          <input type="number" id="expStaff" value="25000" step="500" min="0" inputmode="numeric">
+        </div>
+        <div class="field" style="margin-bottom:0"><label><span>Aur kharcha — bill / transport (Rs)</span></label>
+          <input type="number" id="expOther" value="5000" step="500" min="0" inputmode="numeric">
+        </div>
+        <div class="amt-total"><span>Kul Monthly Kharcha</span><strong class="mono" id="expTotal">Rs 50,000</strong></div>
+        <button type="button" class="btn-sm" id="applyExpBtn">✓ Ye Total Monthly Kharcha Lagao</button>
+        <div class="amt-msg" id="expMsg"></div>
+      </div>
+
+      <h3>🏦 Bank Loan ka Hisaab</h3>
+      <div class="toggle"><span>Loan ki qist bhi shamil karo</span><input type="checkbox" id="loanOn" checked></div>
+      <div id="loanFields" style="margin-top:14px">
+        <div class="field"><label><span>Loan Amount (Rs) — haath se likho</span><span id="loanShort">75 Lakh</span></label>
+          <input type="number" id="loanAmt" value="7500000" step="1000" min="0" inputmode="numeric" placeholder="Apni marzi ki loan raqam likho, maslan 6200000">
+          <div class="hint"><b>Koi bhi raqam khud type kar sakte ho</b> — sirf 50 / 75 lakh / 1 crore par majboor nahi ho. Misaal: Tier 3 Rs 75 lakh tak 7% par, Tier 4 par 8% — dono try karo.</div>
+          <div class="add-row" aria-label="Loan mein raqam jodo">
+            <span>Loan mein ye raqam ADD karo:</span>
+            <button type="button" class="add-chip" data-addloan="100000">+ Rs 1 Lakh</button>
+            <button type="button" class="add-chip" data-addloan="500000">+ Rs 5 Lakh</button>
+            <button type="button" class="add-chip" data-addloan="1000000">+ Rs 10 Lakh</button>
+            <button type="button" class="add-chip neg" data-addloan="-500000">− Rs 5 Lakh</button>
+            <button type="button" class="add-chip neg" data-addloan="reset">Wapas Rs 75 Lakh</button>
+          </div>
+        </div>
+        <div class="field"><label><span>Bank Markup Rate</span><span id="loanRateVal">7%</span></label>
+          <div class="slider-row"><input type="range" id="loanRate" min="0" max="20" step="0.5" value="7" aria-label="Bank markup rate slider"><input type="number" class="mini-num" id="loanRateN" value="7" min="0" max="20" step="0.5" aria-label="Bank markup rate haath se likho"></div>
+        </div>
+        <div class="field"><label><span>Loan ki Muddat</span><span id="loanYearsVal">5 saal</span></label>
+          <div class="slider-row"><input type="range" id="loanYears" min="1" max="10" step="1" value="5" aria-label="Loan muddat slider"><input type="number" class="mini-num" id="loanYearsN" value="5" min="1" max="10" step="1" aria-label="Loan muddat saal haath se likho"></div>
+          <div class="hint">Stock working capital hai — aam tor par max 5 saal milti hai. Box mein saal haath se bhi likh sakte ho.</div>
+        </div>
+      </div>
+
+      <button class="btn" id="copyBtn" style="margin-top:18px">📋 Ye Hisaab Copy Karo</button>
+      <div id="copyMsg"></div>
+    </aside>
+
+    <!-- RESULTS -->
+    <main class="stack">
+      <div class="kpis">
+        <div class="kpi"><small>Ek Product Bikega</small><strong class="mono" id="kSell">—</strong><p id="kSellSub">Cost + markup</p></div>
+        <div class="kpi"><small>Down Payment / Customer</small><strong class="mono" id="kDown">—</strong><p>Pehle din wasool</p></div>
+        <div class="kpi highlight"><small>Monthly Qist / Customer</small><strong class="mono" id="kQist">—</strong><p id="kQistSub">12 qiston mein</p></div>
+        <div class="kpi"><small>Products ki Tadaad</small><strong class="mono" id="kProd">—</strong><p id="kProdSub">Stock budget se</p></div>
+      </div>
+
+      <section class="panel">
+        <h2>Ek Product ka Hisaab</h2>
+        <p class="sub">Ek phone par paisa kahan kahan jata hai — yehi hisaab har product par lagega.</p>
+        <div class="breakbar"><div id="bbCost" style="background:var(--green)"></div><div id="bbProfit" style="background:var(--gold)"></div></div>
+        <div class="legend"><span><i class="dot" style="background:var(--green)"></i>Tumhari cost <b class="mono" id="lgCost"></b></span><span><i class="dot" style="background:var(--gold)"></i>Tumhara markup / munafa <b class="mono" id="lgProfit"></b></span></div>
+        <div class="scrollx" style="margin-top:12px"><table>
+          <tr><td>Kharid qeemat (tumhari cost)</td><td class="num" id="rCost">—</td></tr>
+          <tr><td>Bechne ki qeemat (customer ke liye total)</td><td class="num" id="rSell">—</td></tr>
+          <tr><td>Down payment — pehle din</td><td class="num" id="rDown">—</td></tr>
+          <tr><td>Baaki rakam qiston mein</td><td class="num" id="rFin">—</td></tr>
+          <tr class="total"><td>Har mahine ki qist × <span id="rMonths">12</span></td><td class="num" id="rQist">—</td></tr>
+        </table></div>
+      </section>
+
+      <section class="panel">
+        <h2>Poora Stock Bikne par — Kul Hisaab</h2>
+        <div class="scrollx"><table>
+          <tr><td>Stock ke liye budget</td><td class="num" id="tBudget">—</td></tr>
+          <tr><td>Reserve mein bacha hua paisa</td><td class="num" id="tReserve">—</td></tr>
+          <tr><td>Kul farokht (saare products)</td><td class="num" id="tSales">—</td></tr>
+          <tr><td>Down payments se foran wasool</td><td class="num" id="tDownColl">—</td></tr>
+          <tr><td>Qiston se wasool hona hai</td><td class="num" id="tFinColl">—</td></tr>
+          <tr><td>Har mahine kul collection (saare customers se)</td><td class="num" id="tMonthlyColl">—</td></tr>
+          <tr><td>Khara munafa (markup) — default se pehle</td><td class="num" id="tGross">—</td></tr>
+          <tr><td>Default ka andaza nuqsan (<span id="tDefPct">5</span>%)</td><td class="num" style="color:var(--red)" id="tDefLoss">—</td></tr>
+          <tr><td>Markup − default (bank markup aur kharcha se pehle)</td><td class="num" id="tGrossNet">—</td></tr>
+          <tr><td>Kharcha — <span id="tExpMonths">12</span> mahine × monthly kharcha</td><td class="num" style="color:var(--red)" id="tExpTotal">—</td></tr>
+          <tr><td>Bank markup — sirf pehle <span id="tBankMonths">12</span> mahine ka hissa (poori loan muddat ka nahi)</td><td class="num" style="color:var(--red)" id="tBankInt">—</td></tr>
+          <tr class="total"><td>Asal andaza munafa — pehle cycle (<span id="tCycleMonths">12</span> mahine) ke baad</td><td class="num" id="tNet">—</td></tr>
+        </table></div>
+        <div class="note" style="margin-top:14px" id="bankNote">Bank ki qist ka hisaab neeche cash-flow mein shamil hai.</div>
+      </section>
+
+      <section class="panel">
+        <h2>Mahina-ba-Mahina Cash Flow</h2>
+        <p class="sub">Mahina 0 = jis din stock bikta hai (down payments). Us ke baad har mahine qisten atengi, bank ki qist aur kharcha niklega.</p>
+        <div class="chart-wrap"><div id="chart"></div>
+          <div class="legend"><span><i class="dot" style="background:var(--green2)"></i>Us mahine ka net cash (collection − bank qist − kharcha)</span></div>
+        </div>
+        <div class="scrollx" style="margin-top:12px"><table>
+          <thead><tr><th>Mahina</th><th class="num">Collection</th><th class="num">Bank Qist</th><th class="num">Kharcha</th><th class="num">Net</th><th class="num">Kul Jama</th></tr></thead>
+          <tbody id="cfBody"></tbody>
+        </table></div>
+      </section>
+
+      <div class="two">
+        <section class="panel">
+          <h2>Har Qeemat ke Phone par Qist</h2>
+          <p class="sub">Tumhare maujooda markup / down payment / 12 qist par — customer ko samjhane ke liye ready table.</p>
+          <div class="scrollx"><table>
+            <thead><tr><th>Phone ki Qeemat</th><th class="num">Bikega</th><th class="num">Down</th><th class="num">Qist / Mahina</th></tr></thead>
+            <tbody id="priceBody"></tbody>
+          </table></div>
+        </section>
+
+        <section class="panel">
+          <h2>Markup Badalne se Kya Hoga?</h2>
+          <p class="sub">Zyada markup = zyada munafa, lekin customer kam. Apne hi product par muqabla:</p>
+          <div class="scrollx"><table>
+            <thead><tr><th>Markup</th><th class="num">Bikega</th><th class="num">Qist</th><th class="num">Munafa / Piece</th></tr></thead>
+            <tbody id="markupBody"></tbody>
+          </table></div>
+        </section>
+      </div>
+
+      <section class="panel">
+        <h2>Pehle Din se Lazmi System</h2>
+        <p class="sub">Hisaab jitna hi zaroori — warna collection rukti hai aur nuqsan tumhara hota hai, bank ki qist nahi rukti.</p>
+        <ul class="checklist">
+          <li><span><b>2 guarantors (zamanat dene wale)</b> har customer ke liye — CNIC copies ke sath.</span></li>
+          <li><span><b>CNIC + income proof verify</b> karo — nokri / karobar ka saboot baghair phone mat do.</span></li>
+          <li><span><b>Bank ke samne business ko “mobile retail / trading”</b> likho — stock khareed kar aage bechna. “Qarz dene ka business” mat likho, us ke liye alag licence chahiye hota hai.</span></li>
+          <li><span><b>Likhit agreement</b> har sale par — total qeemat, down payment, qist ki date aur late / default par kya hoga, sab pehle se tay.</span></li>
+          <li><span><b>Har mahine pehle bank ki qist alag rakho</b> — collection ka paisa pehle qist ke liye, munafa baad mein.</span></li>
+        </ul>
+        <div class="note red" style="margin-top:14px"><b>Risk wali baat:</b> Customer qist rok de to phone wapas lena aur paisa wasool karna asal mushkil hai. Isi liye down payment zyada aur guarantors mazboot rakhna — upar Default wala slider badha kar dekho ke munafa kitni jaldi khatam hota hai.</div>
+      </section>
+
+      <p class="footer">Ye calculator andazon par hai — asal supplier rates, bank ki final qist aur approval bank hi tay karega. Loan ke liye maujooda notified hisaab: Tier 3 Rs 75 lakh tak 7% par, Tier 4 (Rs 75 lakh se Rs 2.5 crore) 8% par confirm hai, lekin Tier 4 ke named sectors mein mobile retail shamil nahi — bank se pehle confirm karna.</p>
+    </main>
+  </div>
+</div>
+
+<script>
+var $=function(id){return document.getElementById(id)};
+function fmt(n){ if(!isFinite(n)) n=0; return "Rs "+Math.round(n).toLocaleString("en-PK"); }
+function fmtQ(n){ if(!isFinite(n)) n=0; var r=Math.round(n*100)/100; if(Math.abs(r-Math.round(r))<0.005) return fmt(r); return "Rs "+r.toLocaleString("en-PK",{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function interestFirstMonths(P,annualPct,years,monthsCount){
+  if(P<=0) return 0; var r=annualPct/100/12; if(r===0) return 0;
+  var e=emi(P,annualPct,years), bal=P, total=0, n=years*12, k=Math.min(monthsCount,n);
+  for(var i=0;i<k;i++){ var intr=bal*r; total+=intr; bal-=(e-intr); if(bal<0) bal=0; }
+  return total;
+}
+function short(n){ if(n>=10000000) return "Rs "+(n/10000000).toFixed(2)+" Cr"; if(n>=100000) return "Rs "+(n/100000).toFixed(1)+" Lakh"; if(n>=1000) return "Rs "+(n/1000).toFixed(1)+"k"; return fmt(n); }
+function num(id){ var v=parseFloat($(id).value); return isNaN(v)?0:v; }
+
+function emi(P, annualPct, years){
+  var r=annualPct/100/12, n=years*12;
+  if(P<=0||n<=0) return 0;
+  if(r===0) return P/n;
+  var f=Math.pow(1+r,n); return P*r*f/(f-1);
+}
+
+function calc(){
+  var capital=num("capital"), stockPct=num("stockPct"), cost=num("cost"),
+      markup=num("markup"), downPct=num("downPct"), months=Math.max(1,Math.round(num("months"))),
+      defPct=num("defaultPct"), expense=num("expense");
+  var loanOn=$("loanOn").checked, loanAmt=num("loanAmt"), loanRate=num("loanRate"), loanYears=num("loanYears");
+  var bankEmi=loanOn?emi(loanAmt,loanRate,loanYears):0;
+  var loanTotal=bankEmi*loanYears*12, loanMarkup=loanOn?Math.max(0,loanTotal-loanAmt):0;
+
+  var budget=capital*stockPct/100, reserve=capital-budget;
+  var products=cost>0?Math.floor(budget/cost):0;
+  var used=products*cost;
+  var sell=cost*(1+markup/100), profitPer=sell-cost;
+  var down=sell*downPct/100, fin=sell-down, qist=months>0?fin/months:0;
+
+  var totalSales=products*sell, downColl=products*down, finColl=products*fin,
+      monthlyColl=products*qist, gross=products*profitPer,
+      defLoss=finColl*defPct/100, grossNet=gross-defLoss,
+      expCycle=expense*months, bankIntCycle=loanOn?interestFirstMonths(loanAmt,loanRate,loanYears,months):0,
+      net=grossNet-expCycle-bankIntCycle;
+
+  // labels
+  $("stockPctVal").textContent=stockPct+"%"; $("markupVal").textContent=markup+"%";
+  $("downVal").textContent=downPct+"%"; $("monthsVal").textContent=months+" mahine";
+  $("defVal").textContent=defPct+"%"; $("loanRateVal").textContent=loanRate+"%";
+  $("loanYearsVal").textContent=loanYears+" saal";
+  $("capShort").textContent=short(capital).replace("Rs ",""); $("loanShort").textContent=short(loanAmt).replace("Rs ","");
+  $("loanFields").style.display=loanOn?"block":"none";
+  // manual type-in boxes ko slideron ke sath sync rakho (jo box focus mein hai use mat chhero)
+  [["stockPct",stockPct],["markup",markup],["downPct",downPct],["months",months],["defaultPct",defPct],["loanRate",loanRate],["loanYears",loanYears]].forEach(function(p){ var nEl=$(p[0]+"N"); if(nEl&&document.activeElement!==nEl) nEl.value=p[1]; });
+
+  // hero + kpis
+  $("hCapital").textContent=short(capital); $("hProducts").textContent=products.toLocaleString("en-PK")+" products";
+  $("hMonthly").textContent=short(monthlyColl); $("hProfit").textContent=short(net);
+  $("kSell").textContent=fmt(sell); $("kSellSub").textContent="Cost "+fmt(cost)+" + "+markup+"% markup";
+  $("kDown").textContent=fmt(down); $("kQist").textContent=fmtQ(qist); $("kQistSub").textContent=months+" qiston mein · baaki "+fmt(fin);
+  $("kProd").textContent=products.toLocaleString("en-PK"); $("kProdSub").textContent="Stock budget "+fmt(budget)+" se";
+
+  // per product
+  var tot=sell||1; $("bbCost").style.width=(cost/tot*100)+"%"; $("bbProfit").style.width=(profitPer/tot*100)+"%";
+  $("lgCost").textContent=fmt(cost); $("lgProfit").textContent=fmt(profitPer);
+  $("rCost").textContent=fmt(cost); $("rSell").textContent=fmt(sell); $("rDown").textContent=fmt(down);
+  $("rFin").textContent=fmt(fin); $("rMonths").textContent=months; $("rQist").textContent=fmtQ(qist);
+
+  // totals
+  $("tBudget").textContent=fmt(budget)+"  ("+products+" × "+fmt(cost)+" = "+fmt(used)+")";
+  $("tReserve").textContent=fmt(reserve);
+  $("tSales").textContent=fmt(totalSales); $("tDownColl").textContent=fmt(downColl);
+  $("tFinColl").textContent=fmt(finColl); $("tMonthlyColl").textContent=fmt(monthlyColl);
+  $("tGross").textContent=fmt(gross); $("tDefPct").textContent=defPct; $("tDefLoss").textContent="− "+fmt(defLoss);
+  $("tGrossNet").textContent=fmt(grossNet);
+  $("tExpMonths").textContent=months; $("tExpTotal").textContent="− "+fmt(expCycle);
+  $("tBankMonths").textContent=months; $("tBankInt").textContent=loanOn?("− "+fmt(bankIntCycle)):"— (loan off)";
+  $("tCycleMonths").textContent=months; $("tNet").textContent=fmt(net); $("tNet").style.color=net<0?"var(--red)":"";
+
+  $("bankNote").innerHTML=loanOn
+    ? "<b>Bank loan:</b> "+fmt(loanAmt)+" · "+loanRate+"% · "+loanYears+" saal — monthly qist <b>"+fmt(bankEmi)+"</b>, kul bank markup <b>"+fmt(loanMarkup)+"</b>. Tumhari monthly collection "+fmt(monthlyColl)+" hai, to qist ke baad <b>"+fmt(monthlyColl-bankEmi-expense)+"</b> bachta hai (kharcha nikal kar)."
+    : "Bank loan off hai — hisaab sirf apne capital par chal raha hai. Loan on karne ke liye left panel mein toggle on karo.";
+
+  // cashflow table + chart
+  var rows="", cum=downColl, chartData=[{label:"M0 · Down",net:downColl-bankEmi*0}];
+  rows+='<tr><td><b>Mahina 0</b> — stock bika</td><td class="num">'+fmt(downColl)+'</td><td class="num">—</td><td class="num">—</td><td class="num">'+fmt(downColl)+'</td><td class="num">'+fmt(cum)+'</td></tr>';
+  for(var m=1;m<=months;m++){
+    var netM=monthlyColl-bankEmi-expense; cum+=netM; chartData.push({label:"M"+m,net:netM});
+    rows+='<tr><td>Mahina '+m+'</td><td class="num">'+fmt(monthlyColl)+'</td><td class="num">'+(loanOn?fmt(bankEmi):"—")+'</td><td class="num">'+fmt(expense)+'</td><td class="num" style="'+(netM<0?'color:var(--red);font-weight:700':'')+'">'+fmt(netM)+'</td><td class="num">'+fmt(cum)+'</td></tr>';
+  }
+  $("cfBody").innerHTML=rows;
+
+  // SVG bar chart
+  var maxV=0; chartData.forEach(function(d){maxV=Math.max(maxV,Math.abs(d.net))}); if(maxV===0)maxV=1;
+  var W=720,H=170,bw=Math.min(42,(W-20)/chartData.length-6), svg='<svg viewBox="0 0 '+W+' '+H+'" width="100%" role="img" aria-label="Monthly net cash chart">';
+  chartData.forEach(function(d,i){
+    var h=Math.max(3,Math.abs(d.net)/maxV*105), x=12+i*((W-24)/chartData.length), y=d.net>=0?135-h:135;
+    svg+='<rect x="'+x+'" y="'+y+'" width="'+bw+'" height="'+h+'" rx="4" fill="'+(d.net>=0?'var(--green2)':'#d64541')+'"></rect>';
+    svg+='<text x="'+(x+bw/2)+'" y="152" font-size="9" text-anchor="middle" fill="var(--muted)">'+d.label.replace(" · Down","")+'</text>';
+    if(i===0||i===chartData.length-1||d.net<0) svg+='<text x="'+(x+bw/2)+'" y="'+(y-4)+'" font-size="9" text-anchor="middle" fill="var(--ink)" font-weight="600">'+short(d.net).replace("Rs ","")+'</text>';
+  });
+  svg+='<line x1="8" y1="135" x2="'+(W-8)+'" y2="135" stroke="var(--line)" stroke-width="1.5"/></svg>';
+  $("chart").innerHTML=svg;
+
+  // price table
+  var tiers=[20000,30000,40000,50000,65000,85000,120000,180000], pr="";
+  tiers.forEach(function(c){ var s=c*(1+markup/100), d=s*downPct/100, q=(s-d)/months;
+    pr+='<tr'+(c===cost?' style="background:var(--gold-bg);font-weight:700"':'')+'><td>'+fmt(c)+(c===cost?' ★ tumhara':'')+'</td><td class="num">'+fmt(s)+'</td><td class="num">'+fmt(d)+'</td><td class="num">'+fmtQ(q)+'</td></tr>'; });
+  $("priceBody").innerHTML=pr;
+
+  // markup scenarios
+  var ms=[15,20,25,30,40], mr="";
+  [15,20,25,30,40].forEach(function(mp){ var s=cost*(1+mp/100), d=s*downPct/100, q=(s-d)/months;
+    mr+='<tr'+(mp===markup?' style="background:var(--gold-bg);font-weight:700"':'')+'><td>'+mp+'%'+(mp===markup?' ★':'')+'</td><td class="num">'+fmt(s)+'</td><td class="num">'+fmtQ(q)+'</td><td class="num">'+fmt(s-cost)+'</td></tr>'; });
+  $("markupBody").innerHTML=mr;
+
+  return {capital:capital,products:products,sell:sell,down:down,qist:qist,monthlyColl:monthlyColl,net:net,bankEmi:bankEmi,months:months,markup:markup,downPct:downPct,cost:cost,fmtQ:fmtQ};
+}
+
+var ids=["capital","capitalR","stockPct","stockPctN","cost","markup","markupN","downPct","downPctN","months","monthsN","defaultPct","defaultPctN","expense","loanAmt","loanRate","loanRateN","loanYears","loanYearsN"];
+ids.forEach(function(id){ var el=$(id); if(el) el.addEventListener("input",function(){
+  if(id==="capital") $("capitalR").value=$("capital").value;
+  if(id==="capitalR") $("capital").value=$("capitalR").value;
+  if(id.slice(-1)==="N"){ var base=id.slice(0,-1); if($(base)) $(base).value=$(id).value; }
+  else if($(id+"N")){ $(id+"N").value=$(id).value; }
+  calc();
+});});
+$("loanOn").addEventListener("change",calc);
+
+/* ---------- MANUAL RAQAM ADD ---------- */
+function updateCompTotal(){ var t=num("compLoan")+num("compOwn")+num("compOther"); $("compTotal").textContent=short(t)+"  ·  "+fmt(t); return t; }
+function updateExpTotal(){ var t=num("expRent")+num("expStaff")+num("expOther"); $("expTotal").textContent=fmt(t); return t; }
+["compLoan","compOwn","compOther"].forEach(function(id){ $(id).addEventListener("input",updateCompTotal); });
+["expRent","expStaff","expOther"].forEach(function(id){ $(id).addEventListener("input",updateExpTotal); });
+
+$("applyCompBtn").addEventListener("click",function(){
+  var t=updateCompTotal();
+  if(t<=0){ $("compMsg").textContent="Pehle kam az kam ek box mein raqam likho — total 0 hai."; return; }
+  $("capital").value=t; $("capitalR").value=Math.min(50000000,Math.max(100000,t));
+  var ln=num("compLoan"); if(ln>0){ $("loanAmt").value=ln; $("loanOn").checked=true; }
+  document.querySelectorAll(".preset").forEach(function(x){x.classList.remove("active")});
+  calc();
+  $("compMsg").textContent="✓ Lag gaya — Total Capital "+fmt(t)+(ln>0?(" aur Loan "+fmt(ln)):"")+" par hisaab chal raha hai.";
+});
+$("applyExpBtn").addEventListener("click",function(){
+  var t=updateExpTotal(); $("expense").value=t; calc();
+  $("expMsg").textContent="✓ Lag gaya — Monthly kharcha "+fmt(t)+" set ho gaya hai.";
+});
+
+document.querySelectorAll("[data-addcap]").forEach(function(b){ b.addEventListener("click",function(){
+  var v=b.getAttribute("data-addcap");
+  var nv=v==="reset"?10000000:Math.max(0,num("capital")+parseFloat(v));
+  $("capital").value=nv; $("capitalR").value=Math.min(50000000,Math.max(100000,nv));
+  document.querySelectorAll(".preset").forEach(function(x){x.classList.remove("active")});
+  calc(); $("compMsg").textContent="";
+});});
+document.querySelectorAll("[data-addloan]").forEach(function(b){ b.addEventListener("click",function(){
+  var v=b.getAttribute("data-addloan");
+  var nv=v==="reset"?7500000:Math.max(0,num("loanAmt")+parseFloat(v));
+  $("loanAmt").value=nv; $("loanOn").checked=true; calc();
+});});
+updateCompTotal(); updateExpTotal();
+
+document.querySelectorAll(".preset").forEach(function(b){ b.addEventListener("click",function(){
+  document.querySelectorAll(".preset").forEach(function(x){x.classList.remove("active")}); b.classList.add("active");
+  var p=b.getAttribute("data-preset");
+  if(p==="50"){$("capital").value=5000000;$("capitalR").value=5000000;$("loanAmt").value=5000000;}
+  if(p==="75"){$("capital").value=7500000;$("capitalR").value=7500000;$("loanAmt").value=7500000;}
+  if(p==="100"){$("capital").value=10000000;$("capitalR").value=10000000;$("loanAmt").value=7500000;}
+  if(p==="phone30"){$("cost").value=30000;}
+  if(p==="phone85"){$("cost").value=85000;}
+  if(p==="50"||p==="75"||p==="100"){ var cap=num("capital"), ln=num("loanAmt"); $("compLoan").value=ln; $("compOwn").value=Math.max(0,cap-ln); $("compOther").value=0; if(typeof updateCompTotal==="function") updateCompTotal(); }
+  calc();
+});});
+
+$("copyBtn").addEventListener("click",function(){
+  var r=calc();
+  var txt="INSTALMENT BUSINESS HISAAB\nCapital: "+fmt(r.capital)+" (Loan "+fmt(num("compLoan"))+" + Apne "+fmt(num("compOwn"))+" + Aur "+fmt(num("compOther"))+") | Product cost: "+fmt(r.cost)+" | Markup: "+r.markup+"% | Down payment: "+r.downPct+"% | Qist: "+r.months+"\nProducts: "+r.products+" | Ek product bikega: "+fmt(r.sell)+" | Down/customer: "+fmt(r.down)+" | Qist/customer: "+fmtQ(r.qist)+"/mahina\nMonthly collection: "+fmt(r.monthlyColl)+" | Bank qist: "+fmt(r.bankEmi)+" | Asal andaza munafa (pehla cycle, kharcha + bank markup nikal kar): "+fmt(r.net);
+  if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(function(){ $("copyMsg").textContent="✓ Hisaab copy ho gaya — WhatsApp / notes mein paste kar sakte ho."; }); }
+  else{ $("copyMsg").textContent=txt; }
+});
+calc();
+</script>
+</body>
+</html>
